@@ -6,7 +6,7 @@ export class CambridgeDictionaryScraper implements IDictionaryScraper {
   private browser: Browser | null = null;
   private context: BrowserContext | null = null;
 
-  constructor() {}
+  constructor() { }
 
   async initialize(): Promise<void> {
     this.browser = await chromium.launch({ headless: true });

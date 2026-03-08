@@ -1,0 +1,9 @@
+services:
+  cambridge-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "6030:6030"
+    environment:
+      - PORT=6030

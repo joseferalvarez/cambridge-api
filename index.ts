@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { CambridgeDictionaryScraper } from "./src/scrapers/CambridgeDictionaryScraper";
+import { CambridgeDictionaryScraper } from "./src/classes/CambridgeDictionaryScraper";
 import type { IDictionaryScraper } from "./src/interfaces/IDictionaryScraper";
 
 const app = new Hono();
@@ -8,7 +8,7 @@ const app = new Hono();
 app.use(
   "/*",
   cors({
-    origin: [process.env.CORS_ORIGIN || "http://localhost:6020"],
+    origin: "*",
     credentials: true,
   }),
 );
@@ -22,7 +22,7 @@ app.get("/", (c) => {
   });
 });
 
-app.get("/define/:word", async (c) => {
+app.get("/api/define/:word", async (c) => {
   const word = c.req.param("word");
 
   if (!word || word.trim().length === 0) {
@@ -42,9 +42,9 @@ app.get("/api/health", (c) => {
   return c.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-const port = process.env.PORT ? parseInt(process.env.PORT) : 4000;
+const port = process.env.PORT ? parseInt(process.env.PORT) : 6030;
 
-console.log(`Backend server running at http://localhost:${port}`);
+console.log(`Backend server running`);
 
 export default {
   port,
