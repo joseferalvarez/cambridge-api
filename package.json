@@ -4,9 +4,11 @@
   "type": "module",
   "scripts": {
     "dev": "bun --hot ./index.ts",
-    "build": "bun build ./index.ts --outdir ./dist"
+    "build": "echo 'No build step required for Apify'",
+    "start": "bun run ./index.ts"
   },
   "dependencies": {
+    "apify": "^3.1.10",
     "hono": "^4.11.9",
     "playwright": "^1.58.2"
   },

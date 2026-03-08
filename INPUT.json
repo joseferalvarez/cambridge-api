@@ -1,0 +1,20 @@
+{
+  "title": "Cambridge Dictionary Scraper Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "word": {
+      "title": "Word",
+      "type": "string",
+      "description": "A single word to look up in the Cambridge Dictionary"
+    },
+    "words": {
+      "title": "Words",
+      "type": "array",
+      "description": "List of words to look up in the Cambridge Dictionary",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

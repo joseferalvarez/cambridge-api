@@ -1,7 +1,13 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { Actor } from "apify";
 import { CambridgeDictionaryScraper } from "./src/classes/CambridgeDictionaryScraper";
-import type { IDictionaryScraper } from "./src/interfaces/IDictionaryScraper";
+import type { IDictionaryScraper, WordResult } from "./src/interfaces/IDictionaryScraper";
+
+interface ActorInput {
+  word?: string;
+  words?: string[];
+}
 
 const app = new Hono();
 
@@ -18,7 +24,7 @@ const scraper: IDictionaryScraper = new CambridgeDictionaryScraper();
 app.get("/", (c) => {
   return c.json({
     message: "Cambridge Dictionary API",
-    usage: "GET /define/:word",
+    usage: "GET /api/define/:word",
   });
 });
 
@@ -42,11 +48,55 @@ app.get("/api/health", (c) => {
   return c.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-const port = process.env.PORT ? parseInt(process.env.PORT) : 6030;
+async function runActor() {
+  await Actor.init();
 
-console.log(`Backend server running`);
+  const input = await Actor.getInput<ActorInput>();
 
-export default {
-  port,
-  fetch: app.fetch,
-};
+  if (!input) {
+    console.error("No input provided");
+    await Actor.exit(1);
+    return;
+  }
+
+  const words = input.words || (input.word ? [input.word] : []);
+
+  if (words.length === 0) {
+    console.error("No words provided in input");
+    await Actor.exit(1);
+    return;
+  }
+
+  console.log(`Looking up ${words.length} word(s)...`);
+
+  const results: WordResult[] = [];
+
+  for (const word of words) {
+    console.log(`Looking up: ${word}`);
+    const result = await scraper.lookup(word);
+    if (result) {
+      results.push(result);
+      await Actor.pushData(result);
+    }
+  }
+
+  console.log(`Completed. Found ${results.length} result(s).`);
+
+  await scraper.close();
+  await Actor.exit(0);
+}
+
+const isApify = process.env.APIFY_TOKEN || process.env.APIFY_IS_AT_YOU;
+
+if (isApify) {
+  runActor();
+} else {
+  const port = process.env.PORT ? parseInt(process.env.PORT) : 6030;
+
+  console.log(`Backend server running on port ${port}`);
+
+  export default {
+    port,
+    fetch: app.fetch,
+  };
+}
